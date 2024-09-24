@@ -140,7 +140,7 @@ OpenGL自身是一个巨大的状态机：一系列变量描述 OpenGL 此刻应
 * **glEnableVertexAttribArray** 和 **glDisableVertexAttribArray** 的调用
 * 通过 **glVertexAttribPointer** 设置的顶点属性配置
 * 通过 **glVertexAttribPointer** 调用进行的顶点缓冲对象与顶点属性链接
-* 绑定的 EBO 对象
+* 绑定的 EBO 对象(EBO 对象在 VAO 解绑前不能解绑)
 
 ```cpp
 GLuint VAO;
