@@ -29,6 +29,8 @@
 
 ## 缩写/中英文对照
 
+### 缩写
+
 |Abbr |Full
 |- |-
 |OpenGL |Open Graphics Library
@@ -42,6 +44,12 @@
 |VAO    |Vertex Array Object
 |IBO    |Index Buffer Object
 |EBO    |Element Buffer Object
+|Texel  |Texture Pixel
+|SOIL   |Simple OpenGL Image Library
+|GLM    |OpenGL Mathematics
+|FOV    |Field of View
+
+### 中英文对照
 
 |EN |CN
 |- |-
@@ -53,19 +61,25 @@
 |Primitive Type             |基元类型: GL 定义的基础类型如 GLfloat
 |Viewport                   |视口
 |Graphics Pipeline          |图形渲染管线
+
+#### 着色器
+
+|EN |CN
+|- |-
 |Shader                     |着色器: 执行渲染工作的程序
 |OpenGL Shading Language    |OpenGL 着色器语言
 |Vertex Shader              |顶点着色器: 在 **GPU** 显存上存储顶点数据
 |Shape(Primitive) Assembly  |形状(图元)装配
 |Geometry Shader            |几何着色器
 |Rasterization              |光栅化
+|Rasterizer                 |光栅器
 |Fragment Shader            |片段着色器: 计算像素点最终颜色等
 |Tests And Blending         |测试与混合: 检查片段深度和透明度等
 |Primitive                  |图元: GL 定义的形状类型如 GL_POINTS
 |Fragment                   |片段: 一个片段是OpenGL渲染一个像素所需的所有数据
 |Blend                      |混合
 |Stencil                    |(深度)模板
-|Normalized Device Coordinates|标准化设备坐标: x,y,z 有效范围都是 (-1,1)，范围外会被裁剪掉，对应 glViewport 设置的视口范围
+|NDC                        |标准化设备坐标: x,y,z 有效范围都是 (-1,1)，范围外会被裁剪掉，对应 glViewport 设置的视口范围
 |Screen-space Coordinates   |屏幕空间坐标
 |Viewport Transform         |视口变换
 |VBO                        |顶点缓冲对象: 将内存数据缓冲后传递到显存中并维护
@@ -73,6 +87,86 @@
 |EBO/IBO                    |索引缓冲对象: 专门缓冲索引
 |Indexed Drawing            |索引绘制: 根据索引获取顶点数据进行绘制
 |Wireframe Mode             |线框模式
+
+#### 纹理
+
+|EN |CN
+|- |-
+|Texture                    |纹理
+|Texture Map                |纹理映射
+|Texture Pixel              |纹理像素
+|Texture Filtering          |纹理过滤
+|Texture Unit               |纹理单元
+|Fragment Interpolation     |片段插值
+|Sampling                   |采样
+|Sampler                    |采样器
+|Wrapping                   |环绕方式
+|Resolution                 |分辨率
+|Nearest Neighbor Filtering |临近过滤，GL_NEAREST
+|Linear Filtering           |线性过滤，GL_LINEAR
+|Magnify/Minify             |放大/缩小
+|Mipmap                     |多级渐远纹理
+
+#### Transform
+
+|EN |CN
+|- |-
+|Position Vector                |位置向量(有 Direction 和 Magnitude)
+|Scalar                         |标量
+|Component-wise                 |(向量)分量
+|Pythagoras Theorem             |毕达哥拉斯定理(勾股定理)
+|Unit Vector                    |单位向量: 长度为 1 的向量
+|Orthogonal                     |(向量)正交: 两个向量夹角为直角
+|Vector Negation                |向量取反
+|Vector-vector Multiplication   |向量乘法
+|Vector dot product             |向量点乘
+|Vector cross product           |向量叉乘
+|Matrix                         |矩阵
+|Matrix Element                 |矩阵元素
+|Identity Matrix                |单位矩阵: 对角线元素为 1，其他为 0
+|Transposed Matrix              |转置矩阵: 交换矩阵行列
+|Scaling Factor                 |缩放因子
+|Uniform Scale                  |均匀缩放: 所有维度缩放因子一样
+|Column-Major Ordering          |(矩阵)列主序: 先索引列后索引行
+|Non-uniform Scale              |不均匀缩放: 缩放因子在不同维度不一样
+|Translation                    |位移
+|Homogeneous Coordinates        |齐次坐标: xyzw 向量中的 w 分量
+|Direction Vector               |方向向量: 齐次坐标为 0，无法位移
+|Rotation Axis                  |旋转轴
+|Quaternion                     |四元数
+
+#### 坐标系统
+
+|EN |CN
+|- |-
+|Coordinate System              |坐标系统
+|Local/Object Space             |局部空间
+|World Space                    |世界空间
+|View/Camera/Eye Space          |观察空间
+|Clip Space                     |裁剪空间
+|Screen Space                   |屏幕空间
+|Model Matrix                   |模型矩阵: 将局部坐标转换到世界坐标
+|View Matrix                    |观察矩阵: 将世界坐标转换到观察坐标
+|Projection Matrix              |投影矩阵: 将观察坐标转换到裁剪坐标
+|Viewport Transform             |视口变换
+|Coordinate Set                 |坐标集
+|Clipping Volume                |裁剪体积
+|Viewing Box                    |观察区域
+|Frustum                        |平截头体: 由投影矩阵创建的观察区域
+|Perspective Division           |透视划分: 将4维裁剪空间坐标转换为3维标准化设备坐标
+|Orthographic Projection        |正交投影
+|Perspective Projection         |透视投影
+|FOV                            |[(竖直方向)视野](./GLM.md#投影矩阵)
+|Right-handed System            |右手系，OpenGL 是右手坐标系
+|Z-buffer/Depth Buffer          |Z/深度 缓冲区: 存储深度信息
+|Depth Testing                  |深度测试
+
+#### 摄像机
+
+|EN |CN
+|- |-
+|Right Vector                   |右向量: 摄像机空间的 x 轴的正方向
+|Up Vector                      |上向量: 摄像机空间的 y 轴正方向
 
 ## 系统自带 OpenGL 库及查看版本
 
@@ -92,9 +186,13 @@ glGetString(GL_SHADING_LANGUAGE_VERSION​);   // 支持的 GLSL 版本
 
 ## 概念
 
+### Graphics Pipeline
+
+![graphics_pipeline](./pics/graphics_pipeline.png)
+
 ### EGL/GLES
 
-OpenGL ES (OpenGL for Embedded Systems) 是一种为嵌入式系统设计的图形API。它是OpenGL的一个子集，比桌面版的OpenGL精简，去掉了许多复杂的功能，旨在提供一个更轻量级的图形API，适合性能和资源有限的设备。
+GLES (OpenGL for Embedded Systems) 是一种为嵌入式系统设计的图形API。它是OpenGL的一个子集，比桌面版的OpenGL精简，去掉了许多复杂的功能，旨在提供一个更轻量级的图形API，适合性能和资源有限的设备。
 
 EGL (Embedded-System Graphics Library) 是一个中间层接口，主要用于在OpenGL ES（GLES）和本地窗口系统（如X Window系统或Android的Surface）之间提供连接。它负责创建和管理OpenGL ES上下文，处理图形缓冲区的分配以及交换缓冲区等操作。
 
@@ -127,7 +225,11 @@ OpenGL自身是一个巨大的状态机：一系列变量描述 OpenGL 此刻应
 
 通常可以理解为 z 坐标，它代表一个像素在空间中和你的距离，如果离你远就可能被别的像素遮挡，你就看不到它了，它会被丢弃，以节省资源。
 
-### 着色器程序
+### 着色器
+
+[GLSL](./GLSL.md)
+
+着色器程序(Shader Program)是运行在 GPU 上的小程序。
 
 着色器程序对象(Shader Program Object)是多个着色器合并之后并最终链接完成的版本。如果要使用编译好的着色器必须把它们链接为一个着色器程序对象，然后在渲染对象的时候激活这个着色器程序。已激活着色器程序的着色器将在我们发送渲染调用的时候被使用。
 
@@ -168,7 +270,245 @@ glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0)
 glBindVertexArray(0);
 ```
 
-## API / 函数接口
+### Texture
+
+纹理是一个2D图片（甚至也有1D和3D的纹理）。除了图像以外，纹理也可以被用来储存大量的数据，这些数据可以发送到着色器上。
+
+#### 纹理环绕方式
+
+纹理坐标的范围通常是从(0, 0)到(1, 1)，超出部分根据以下方式处理
+
+|环绕方式(Wrapping) |desc
+|- |-
+|GL_REPEAT          |重复纹理图像(默认行为)
+|GL_MIRRORED_REPEAT |和GL_REPEAT一样，但每次重复图片是镜像放置的
+|GL_CLAMP_TO_EDGE   |超出的部分会重复纹理坐标的边缘，产生一种边缘被拉伸的效果
+|GL_CLAMP_TO_BORDER |超出的坐标为用户指定的边缘颜色
+
+[代码应用位置](#soil)
+
+```c
+// 纹理坐标轴为 str, 等价于 xyz
+// 设置 Wrapping
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+float borderColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+```
+
+#### 纹理过滤
+
+```yml
+GL_NEAREST: 选择中心点最接近纹理坐标的那个像素(默认方式)
+GL_LINEAR : 基于纹理坐标附近的纹理像素，计算出一个插值
+```
+
+```c
+// 指定放大/缩小时纹理过滤方式
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+```
+
+#### 多级渐远纹理(Mipmap)
+
+简单来说就是一系列的纹理图像，后一个纹理图像尺寸是前一个的二分之一，OpenGL 会根据观察者距离使用不同的纹理。可以使用 **glGenerateMipmaps** 自动生成 Mipmap。
+
+Mipmap 机制仅适用于纹理被缩小的情况。纹理放大就是上面的纹理过滤方式。
+
+Mipmap 切换过滤方式
+
+|过滤方式 |desc
+|- |-
+|GL_NEAREST_MIPMAP_NEAREST  |使用最临近 mipmap, 临近过滤
+|GL_LINEAR_MIPMAP_NEAREST   |使用最临近 mipmap, 线性插值
+|GL_NEAREST_MIPMAP_LINEAR   |使用相邻 mipmap 线性插值, 临近过滤
+|GL_LINEAR_MIPMAP_LINEAR    |使用相邻 mipmap 线性插值, 线性插值
+
+```c
+// 设置缩小图像为 mipmap 方式
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+// 设置放大图像过滤方式
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+```
+
+#### 加载与创建纹理
+
+##### SOIL
+
+[SOIL](https://github.com/SpartanJ/SOIL2)
+
+使用 SOIL 加载的图片是上下颠倒的，因为 OpenGL 的 y 轴坐标原点在图片 **底部**，但是图片本身的 y 轴坐标原点通常在 **顶部**。SOIL 并没有在加载时重置 y 原点。
+
+```c
+GLuint gen_texture(const char *img_path) {
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    // 设置环绕方式
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    int width, height;
+    // 加载图片资源
+    unsigned char *img = SOIL_load_image(img_path, &width, &height, 0, SOIL_LOAD_RGB);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, img);
+    // 创建 mipmap
+    glGenerateMipmap(GL_TEXTURE_2D);
+    SOIL_free_image_data(img);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    return texture;
+}
+```
+
+##### 使用多个纹理单元
+
+```c
+// 有 0 ~ 15 共 16 个纹理单元可以使用
+glActiveTexture(GL_TEXTURE0);           // 先激活指定纹理单元
+glBindTexture(GL_TEXTURE_2D, texture);  // 再绑定
+// 将 GLSL 中声明的 sampler2D 变量关联到 0 号纹理单元
+glUniform1i(glGetUniformLocation(shader_program, "GLSL_texture_name", 0));
+```
+
+### Transformations(变换)
+
+#### 向量
+
+既有方向 (**Direction**) 又有大小 (**Magnitude**)
+
+一个有三个维度 (**Dimension**) 的向量:
+
+$$
+\vec{v} = \begin{pmatrix}
+x \\
+y \\
+z
+\end{pmatrix}
+$$
+
+**加标量:** $ \begin{pmatrix} x \\ y \\ z \end{pmatrix} + a = \begin{pmatrix} x + a \\ y + a \\ z + a \end{pmatrix} $
+
+**取反:** $ -\begin{pmatrix} x \\ y \\ z \end{pmatrix} = \begin{pmatrix} -x \\ -y \\ -z \end{pmatrix} $
+
+**向量加法:** $
+\begin{pmatrix} x \\ y \\ z \end{pmatrix} +
+\begin{pmatrix} a \\ b \\ c \end{pmatrix} =
+\begin{pmatrix} x + a \\ y + b \\ z + c \end{pmatrix} $
+
+**向量减法:** $
+\begin{pmatrix} x \\ y \\ z \end{pmatrix} -
+\begin{pmatrix} a \\ b \\ c \end{pmatrix} =
+\begin{pmatrix} x - a \\ y - b \\ z - c \end{pmatrix} $
+
+**长度:** 使用勾股定理计算，表示为 **$ ||\vec{v}|| $**
+
+**向量点乘定义:** $ \vec{v} · \vec{k} = ||\vec{v}|| * ||\vec{k}|| * cos(θ) $ ，其中 **$θ$** 为两个向量间夹角
+**向量点乘:** $
+\begin{pmatrix} x \\ y \\ z \end{pmatrix} ·
+\begin{pmatrix} a \\ b \\ c \end{pmatrix} =
+x * a + y * b + z * c $
+
+**向量叉乘定义:** 两个不平行向量叉乘后生成一个正交于这两个向量的第三个向量。
+**向量叉乘:** ![cross_product](./pics/vector_cross_product.png)
+
+#### 矩阵
+
+二维矩阵索引先索引行再索引列
+
+**加标量:** ![matrices_add_scalar](./pics/matrices_add_scalar.png)
+
+**矩阵相加:** ![matrices_add_matrices](./pics/matrices_add_matrices.png)
+
+**乘标量:** ![matrices_multiply_scalar](./pics/matrices_multiply_scalar.png)
+
+**矩阵乘法规则:**
+
+* 要求: 前一个矩阵的**列数**要和后一个矩阵的**行数**一致
+* 矩阵相乘的结果也是一个矩阵，行数为前一个矩阵行数，列数为后一个矩阵列数
+* 结果矩阵元素计算方式: 前一个矩阵的**行**(中每一个元素) 分别乘以**相同索引**的 后一个矩阵的**列**(中每一个元素)，作为结果矩阵中该 **行列** 位置的元素，如 M1 第 a 行乘以 M2 第 b 列作为 M3 第 a 行 b 列元素
+* 矩阵乘法不满足交换律
+
+**矩阵相乘:** ![matrices_multiply_matrices](./pics/matrices_multiply_matrices.png)
+
+**矩阵乘向量:** 把向量作为 1 列的矩阵相乘
+
+#### 缩放 / 位移 / 旋转矩阵
+
+缩放矩阵: ![scaling_matrix](./pics/scaling_matrix.png)
+
+位移矩阵: ![translation_matrix](./pics/translation_matrix.png)
+
+沿 x 轴旋转: ![rotation_matrix_x](./pics/rotation_matrix_x.png)
+沿 y 轴旋转: ![rotation_matrix_y](./pics/rotation_matrix_y.png)
+沿 z 轴旋转: ![rotation_matrix_z](./pics/rotation_matrix_z.png)
+
+#### 组合矩阵
+
+对目标进行操作顺序应该是: **缩放 -> 旋转 -> 位移**，否则容易相互干扰
+创建矩阵时顺序则 **相反**，位移矩阵需要在最前面
+
+$$ \vec{Final} = \vec{Translate} · \vec{Rotate} · \vec{Scale} $$
+
+后方矩阵操作(Scale)不会影响前方矩阵操作(Translate)
+
+#### GLM
+
+[GLM](./GLM.md)
+
+### Coordinate System(坐标系统)
+
+```yml
+Local Coordinate    : 相对于局部原点的坐标
+Global Coordinate   : 相对于世界原点
+View Coordinate     : 相对于摄像机(Camera)或观察者，如何设置摄像机位置?
+Clip Coordinate     : 处理 (-1, 1) 范围并判断哪些顶点会出现在屏幕上
+Screen Coordinate   : 视口变换
+```
+
+#### 坐标变换
+
+$$
+\vec{Vclip} = M_{projection} · M_{view} · M_{model} · \vec{Vlocal}
+$$
+
+从创建物体到最终显示到屏幕上:
+
+注意: **View Matrix** 最终是应用到 **场景** 上的而不是摄像机上
+
+```mermaid
+graph LR
+    Local --Model Matrix--> Global --View Matrix--> View --Projection Matrix--> Clip --> Screen
+```
+
+#### Clip Coordinate
+
+正交投影: 定义一个立方体，只有立方体内的物体会被保留，然后将三个维度的坐标映射到 **[-1, 1]**
+透视投影: 修改了每个顶点坐标的 **w** 值，**越远** w **越大**，每个顶点坐标的分量都会除以它的 **w** 分量
+
+#### 视口变换
+
+将 [-1, 1] 范围内的坐标准换到有 glViewport 定义的坐标范围内, 即 Clip Space -> Screen Space。之后坐标会经光栅器片段化。
+
+#### Z/深度 缓冲区
+
+深度信息存储在每个片段里面(作为片段的 **z** 值)当片段像输出颜色时，OpenGL会将它的 **深度值** 和 **z** 缓冲进行 **比较**, 如果当前的片段在其它片段之后, 它将会被丢弃，否则覆盖之前的片段。这个过程称为深度测试(Depth Testing), 是由OpenGL自动完成的。
+
+```c
+glEnable(GL_DEPTH_TEST);        // 开启深度测试
+glDisable(GL_DEPTH_TEST);       // 关闭深度测试
+
+// 清空颜色缓冲和深度缓冲
+glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+```
+
+### Camera(摄像机)
+
+OpenGL本身 **没有** 摄像机的概念，但我们可以通过把场景中的所有物体往相反方向移动的方式来模拟出摄像机，这样感觉就像我们在移动，而不是场景在移动。
+
+#### Look At
+
+[lookAt](./GLM.md#lookat)
+
+## API
 
 ### GL API
 
@@ -182,6 +522,10 @@ glBindVertexArray(0);
 |glGetIntegerv              |获取对应参数值
 |glGetError                 |获取 GL 函数 [错误码](https://registry.khronos.org/OpenGL-Refpages/gl4/html/glGetError.xhtml)
 |glDebugMessageCallback     |注册 error 回调函数
+|glUniform*                 |将 GLSL 中定义的变量绑定到 CPU 变量
+|glUniformMatrix*           |将 GLSL 中定义的矩阵绑定到 CPU 变量
+|glEnable                   |开启某个功能
+|glDisable                  |关闭某个功能
 
 #### GL Window
 
@@ -210,7 +554,7 @@ glBindVertexArray(0);
 |glUseProgram               |应用程序对象
 |glGetProgramiv             |检查程序是否执行成功
 |glGetProgramInfoLog        |获取程序执行日志
-|glEnableVertexAttribArray  |启用顶点属性
+|glEnableVertexAttribArray  |启用顶点属性，参数为 GLSL 中的 location
 
 #### GL Draw
 
@@ -221,6 +565,16 @@ glBindVertexArray(0);
 |glPolygonMode              |设置如何绘制图元，如线框还是填充等
 |glClearColor               |设置 glClear 要用的 RGBA 颜色
 |glClear                    |将窗口设置为 glClearColor, glClearDepth 和 glClearStencil 指定的值
+
+#### GL Texture
+
+|function |desc
+|- |-
+|glGenTextures              |生成纹理对象
+|glBindTexture              |设置当前纹理对象
+|glTexImage2D               |加载纹理图像到纹理对象
+|glGenerateMipmap           |生成 mipmap
+|glActiveTexture            |激活指定纹理单元，默认 GL_TEXTURE0
 
 ### GLFW API
 
@@ -237,6 +591,7 @@ glBindVertexArray(0);
 |glfwSwapBuffers            |交换颜色缓冲(将缓冲区所有像素颜色输出到屏幕?)
 |glfwGetError               |获取错误信息，没有错误为 NULL
 |glfwSetKeyCallback         |设置键盘回调函数
+|glfwGetTime                |获取当前时间(秒)
 
 ### GLEW API
 
@@ -245,6 +600,9 @@ glBindVertexArray(0);
 |glViewport                 |设置视口
 |glVertexAttribPointer      |设置如何解析顶点数据(glBufferData 设置)
 |glShaderSource             |设置着色器代码
+|glGetUniformLocation       |获取 uniform 变量位置，-1 表示没找到
+|glUniform1f                |将 uniform 变量设为 1 个 float 值
+|glUniform4f                |将 uniform 变量设为 4 个 float 值
 
 #### glViewport
 
@@ -255,15 +613,17 @@ void glViewport(GLint left_bottom_x, GLint left_bottom_y, GLsizei width, GLsizei
 
 #### glVertexAttribPointer
 
-每个顶点属性从一个 VBO 管理的内存中获得数据，该 VBO 是在调用 glVertexAttribPointer 时绑定到 GL_ARRAY_BUFFER 的那一个。
+设置如何解析 VBO 显存，每个顶点属性从一个 VBO 管理的显存中获得数据，该 VBO 是在调用 glVertexAttribPointer 时绑定到 GL_ARRAY_BUFFER 的那一个。
 
-```yml
-arg 1: 要配置的顶点属性编号(N)，即顶点着色器中的 layout(location = N) 对应的属性
-arg 2: 顶点属性包含数据个数
-arg 3: 数据类型
-arg 4: 是否需要标准化数据，标准化后所有数据会被映射为 (0,1) 或 (-1,1)
-arg 5: 步长，即顶点属性组之间间隔
-arg 6: 位置数据偏移量
+```c
+void glVertexAttribPointer(GLuint location, GLint size, GLenum type, GLboolean normalized, GLsizei stride,  const void *pointer);
+
+location    : 要配置的顶点属性编号(N)，即顶点着色器中的 layout(location = N) 对应的属性
+size        : 顶点属性包含数据个数
+type        : 数据类型
+normalized  : 是否需要标准化数据，标准化后所有数据会被映射为 (0,1) 或 (-1,1)
+stride      : 步长，即相同 location 的顶点属性组之间间隔
+pointer     : 数据起始位置，0 为无偏移，有多少 offset 将多少 offset 强转为指针
 ```
 
 ## Demo
@@ -279,6 +639,8 @@ arg 6: 位置数据偏移量
 ### 编译安装
 
 [官网指南](https://docs.mesa3d.org/install.html)
+
+[使用 meson 编译](https://docs.mesa3d.org/meson.html)
 
 注意:
 
