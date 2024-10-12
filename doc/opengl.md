@@ -165,8 +165,10 @@
 
 |EN |CN
 |- |-
+|Direction Vector               |方向向量，注意该向量是指向自身的
 |Right Vector                   |右向量: 摄像机空间的 x 轴的正方向
 |Up Vector                      |上向量: 摄像机空间的 y 轴正方向
+|Gram-Schmidt                   |葛兰-施密特正交
 
 ## 系统自带 OpenGL 库及查看版本
 
@@ -210,9 +212,10 @@ GLEW 是一个用于 OpenGL 扩展的库，它可以帮助开发者高效地检�
 
 ### State Machine AND Context
 
-OpenGL自身是一个巨大的状态机：一系列变量描述 OpenGL 此刻应当如何运行。OpenGL的状态通常被称为OpenGL上下文(Context)。我们通常使用如下途径去更改OpenGL状态：设置选项，操作缓冲。最后，我们使用当前OpenGL上下文来渲染。
+OpenGL自身是一个巨大的状态机：一系列变量描述 OpenGL 此刻应当如何运行。OpenGL的状态通常被称为OpenGL上下文(Context)。我们通常使用如下途径去更改OpenGL状态：设置选项(enable)，操作缓冲(buffer)。最后，我们使用当前OpenGL上下文来渲染。
 
 * 可以将 context 看作是驱动用来保存 GL 程序状态信息的大结构体
+* context 是所有 GL 函数的隐式参数
 * context 包含许多资源，如 driver resources in RAM, texture IDs assigned, VBO IDs assigned, enabled states 等
 * 使用 GL function 前必须创建 GL context 并设置为当前 context(可以从窗口创建?)
 * 每个线程都有自身的 context，一个 context 不能同时被多个线程设置为当前
@@ -225,7 +228,7 @@ OpenGL自身是一个巨大的状态机：一系列变量描述 OpenGL 此刻应
 
 通常可以理解为 z 坐标，它代表一个像素在空间中和你的距离，如果离你远就可能被别的像素遮挡，你就看不到它了，它会被丢弃，以节省资源。
 
-### 着色器
+### Shader Program(着色器)
 
 [GLSL](./GLSL.md)
 
@@ -504,6 +507,8 @@ glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 OpenGL本身 **没有** 摄像机的概念，但我们可以通过把场景中的所有物体往相反方向移动的方式来模拟出摄像机，这样感觉就像我们在移动，而不是场景在移动。
 
+我们需要一个摄像机在世界空间中的 **位置**、**观察的方向**、一个**指向它的右测的向量**以及一个**指向它上方的向量**。实际上创建了一个三个单位轴相互垂直的、以摄像机的位置为原点的坐标系。
+
 #### Look At
 
 [lookAt](./GLM.md#lookat)
@@ -636,6 +641,12 @@ pointer     : 数据起始位置，0 为无偏移，有多少 offset 将多少 o
 
 [demo](https://archive.mesa3d.org/demos)
 
+注意:
+
+```txt
+1.查看系统是否有 glvnd(pkg-config --modversion libglvnd)，如果有则不会编译出 libGL(可以删除 libglvnd.pc)
+```
+
 ### 编译安装
 
 [官网指南](https://docs.mesa3d.org/install.html)
@@ -656,7 +667,7 @@ pointer     : 数据起始位置，0 为无偏移，有多少 offset 将多少 o
 #### 安装系统库
 
 ```sh
-sudo apt install libglvnd-dev
+# sudo apt install libglvnd-dev
 sudo apt install libtizonia-dev
 sudo apt install zstd
 sudo apt install rust-1.80-all
@@ -742,11 +753,15 @@ ninja install
 # meson configure --prefix=/usr --libdir=xxx -D dri-drivers-path=xxx ..
 mkdir build & cd build
 # 使用 llvm 的选项要和编译时一致，如使用静态库，不使用 RTTI 等
-meson setup .. -Dshared-llvm=disabled -Dcpp_rtti=false -Ddefault_library=shared
+meson setup .. -Dprefix="/install/directory" -Dosmesa=true -Dshared-llvm=disabled -Dcpp_rtti=false
+# meson setup .. -Ddefault_library=shared
 # 使用指定版本的 llvm
 # meson setup .. --native-file ../custom-llvm.ini
 ninja -j8       # meson compile -C .
 sudo meson install
+
+# 链接库(替代 libGL.so)
+libOSMesa.so
 ```
 
 ## QA
