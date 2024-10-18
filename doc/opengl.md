@@ -125,6 +125,7 @@
 |Matrix Element                 |矩阵元素
 |Identity Matrix                |单位矩阵: 对角线元素为 1，其他为 0
 |Transposed Matrix              |转置矩阵: 交换矩阵行列
+|Inverse Matrix                 |逆矩阵: AB = BA = I 则 AB 互为逆矩阵
 |Scaling Factor                 |缩放因子
 |Uniform Scale                  |均匀缩放: 所有维度缩放因子一样
 |Column-Major Ordering          |(矩阵)列主序: 先索引列后索引行
@@ -134,6 +135,11 @@
 |Direction Vector               |方向向量: 齐次坐标为 0，无法位移
 |Rotation Axis                  |旋转轴
 |Quaternion                     |四元数
+|Euler Angle                    |欧拉角
+|Pitch                          |(欧拉角)俯仰角: 绕 x 轴
+|Yaw                            |(欧拉角)偏航角: 绕 y 轴
+|Roll                           |(欧拉角)滚转角: 绕 z 轴
+|Normal Matrix                  |正规矩阵: transpose(inverse(Matrix))
 
 #### 坐标系统
 
@@ -169,6 +175,36 @@
 |Right Vector                   |右向量: 摄像机空间的 x 轴的正方向
 |Up Vector                      |上向量: 摄像机空间的 y 轴正方向
 |Gram-Schmidt                   |葛兰-施密特正交
+
+#### 光照
+
+|EN |CN
+|- |-
+|Lighting                       |光照
+|Cast the light                 |投射光
+|Phong Lighting Model           |冯氏光照模型
+|Ambient Lighting               |(冯氏)环境光
+|Diffuse Lighting               |(冯式)漫反射
+|Specular Lighting              |(冯氏)镜面反射
+|Specular Intensity             |镜面强度: 物体进行镜面反射能力
+|Reflect                        |(光)反射
+|Global Illumination            |全局照明
+|Normal Vector                  |法向量: 垂直于顶点表面的向量
+|Shininess                      |发光值: 越大反射光的能力越强，散射越少，高光点越小
+|Gouraud                        |在顶点着色器中实现冯氏光照
+|Material                       |材质
+|Scatter                        |散射
+|Highlight                      |高光点
+|Lighting Maps                  |光照贴图
+|Diffuse Texture                |漫反射贴图: 通过纹理表示物体的 diffuse 颜色
+|Specular Texture               |镜面贴图: 通过纹理表示物体的 specular 颜色
+|Emission Map                   |放射光贴图
+|Emission Value                 |发光值
+|Light Caster                   |投光物: 光源
+|Directional Light              |定向光: 光源无限远，即平行光
+|Point Light                    |点光
+|Spotlight                      |聚光
+|Attenuation                    |(光线)衰减
 
 ## 系统自带 OpenGL 库及查看版本
 
@@ -388,7 +424,7 @@ z
 \end{pmatrix}
 $$
 
-**加标量:** $ \begin{pmatrix} x \\ y \\ z \end{pmatrix} + a = \begin{pmatrix} x + a \\ y + a \\ z + a \end{pmatrix} $
+**标量运算(+-*/):** $ \begin{pmatrix} x \\ y \\ z \end{pmatrix} + a = \begin{pmatrix} x + a \\ y + a \\ z + a \end{pmatrix} $
 
 **取反:** $ -\begin{pmatrix} x \\ y \\ z \end{pmatrix} = \begin{pmatrix} -x \\ -y \\ -z \end{pmatrix} $
 
@@ -404,13 +440,18 @@ $$
 
 **长度:** 使用勾股定理计算，表示为 **$ ||\vec{v}|| $**
 
+**分量乘法(Component-wise Multiplication):** $
+\begin{pmatrix} x \\ y \\ z \end{pmatrix} ·
+\begin{pmatrix} a \\ b \\ c \end{pmatrix} =
+\begin{pmatrix} x * a \\ y * b \\ z * c \end{pmatrix}$
+
 **向量点乘定义:** $ \vec{v} · \vec{k} = ||\vec{v}|| * ||\vec{k}|| * cos(θ) $ ，其中 **$θ$** 为两个向量间夹角
 **向量点乘:** $
 \begin{pmatrix} x \\ y \\ z \end{pmatrix} ·
 \begin{pmatrix} a \\ b \\ c \end{pmatrix} =
 x * a + y * b + z * c $
 
-**向量叉乘定义:** 两个不平行向量叉乘后生成一个正交于这两个向量的第三个向量。
+**向量叉乘定义:** 两个不平行向量叉乘后生成一个正交于这两个向量的第三个向量，其长度为 $||\vec{v1}|| * ||\vec{v2}|| * sin(θ)$。
 **向量叉乘:** ![cross_product](./pics/vector_cross_product.png)
 
 #### 矩阵
@@ -459,10 +500,14 @@ $$ \vec{Final} = \vec{Translate} · \vec{Rotate} · \vec{Scale} $$
 
 ### Coordinate System(坐标系统)
 
+右手坐标系示意图: X(大拇指)，Y(食指)，Z(中指)
+
+![rhs](./pics/right_handed_system.jpg)
+
 ```yml
 Local Coordinate    : 相对于局部原点的坐标
 Global Coordinate   : 相对于世界原点
-View Coordinate     : 相对于摄像机(Camera)或观察者，如何设置摄像机位置?
+View Coordinate     : 相对于摄像机(Camera)或观察者
 Clip Coordinate     : 处理 (-1, 1) 范围并判断哪些顶点会出现在屏幕上
 Screen Coordinate   : 视口变换
 ```
@@ -509,9 +554,189 @@ OpenGL本身 **没有** 摄像机的概念，但我们可以通过把场景中�
 
 我们需要一个摄像机在世界空间中的 **位置**、**观察的方向**、一个**指向它的右测的向量**以及一个**指向它上方的向量**。实际上创建了一个三个单位轴相互垂直的、以摄像机的位置为原点的坐标系。
 
+#### Delta Time
+
+上一帧到当前帧时间间隔，所有单位速度都应该乘以该时间间隔再应用，表示物体在当前帧的移动距离，以保证在不同帧率下实际运动速度是一致的
+
 #### Look At
 
 [lookAt](./GLM.md#lookat)
+
+#### 视角移动(Euler Angle)
+
+[右手坐标系示意图](#coordinate-system坐标系统)
+
+对于单位向量 uv (假设 -Z 为正前方，+X 为右向量方向，+Y 为上向量方向)
+
+```yml
+pitch: 俯仰角，即 uv 在 YZ 平面上与 -Z 夹角
+yaw  : 偏航角，即 uv 在 XZ 平面上与 -Z 夹角
+```
+
+uv 在 xyz 方向上的分量为:
+
+$x = -1 * cos(pitch) * sin(yaw)$
+$y = -1 * sin(pitch)$
+$z = -1 * cos(pitch) * cost(yaw)$
+
+### Lighting(光照)
+
+在 OpenGL 中创建一个光源时都会指定一个颜色，光源颜色与物体颜色相乘就是这个物体反射该光源的颜色
+
+$\vec{C}_{final} = \vec{C}_{light} · \vec{C}_{object}$
+
+#### Phong Lighting Model
+
+冯氏光照模型
+
+* 环境光照(Ambient Lighting): 始终给物体一些颜色，并不是完全黑暗
+* 漫反射光照(Diffuse Lighting): 模拟光源对物体不同方向的影响，面相光源一侧更亮
+* 镜面光照(Specular Lighting): 模拟有光泽物体上的亮点，相比于物体本身颜色更倾向于光的颜色
+
+##### Ambient
+
+用光的颜色乘以一个数值很小的常量环境因子(如 0.1)，再乘以物体颜色即可简单模拟
+
+$\vec{C}_{light} · {Factor} · \vec{C}_{object}$
+
+##### Diffuse
+
+光线与物体法线夹角 (θ) 越小，对物体颜色的影响越小，影响因子为 **$cos(θ)$**
+
+着色器数据传递:
+
+* 所有光照的计算需要在片段着色器里进行，需要把法向量由顶点着色器传递到片段着色器
+* 在顶点着色器中使用模型矩阵将顶点坐标转换为世界坐标，传递给片段着色器: $\vec{P}_{current} = vec3(M_{model} * vec4(\vec{P}_{object}, 1.f))$
+* 在片段着色器中计算漫反射颜色，需要多相关向量进行标准化 **(normalize)**
+
+##### Specular
+
+光线经物体反射后方向与视线(反射点指向观察点)夹角越小，对物体颜色影响越大
+
+* 将摄像机位置视作观察点坐标，从反射点指向观察点的向量即为观察向量
+* 反射光强度受物体发光值影响
+
+### Material(材质)
+
+物体材质
+
+* 定义物体材质需要修改不同光照属性比例
+* 设置 uniform 时需要分别设置结构体中每个属性
+* 物体材质(Material) 与 光属性(Light) 共同决定最终颜色
+
+```c
+#version 330 core
+struct Material {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float shininess;
+};
+uniform Material material;
+```
+
+```c
+// 单独设置结构体属性
+glUniform3f(glGetUniformLocation(program, "material.ambient"), x, y, z);
+```
+
+光属性
+
+```c
+#version 330 core
+struct Light {
+    vec3 ambient;       // light_color * ambient_strength
+    vec3 diffuse;       // light_color
+    vec3 specular;      // light_color
+    vec3 position;      // 光源位置
+};
+uniform Light light;
+```
+
+最终效果
+
+```c
+// 环境光
+vec3 ambient_color = light.ambient * material.ambient;
+
+// 漫反射光
+vec3 light_dir = normalize(light.position - cur_pos);
+vec3 normal = normalize(Normal);
+float diff_strength = max(dot(normal, light_dir), 0.f);
+vec3 diffuse_color = light.diffuse * material.diffuse * diff_strength;
+
+// 镜面高光
+vec3 view_dir = normalize(view_pos - cur_pos);
+vec3 reflect_dir = reflect(-light_dir, Normal);
+float specular_strength = pow(max(dot(view_dir, reflect_dir), 0.f), material.shininess);
+vec3 specular_color = light.specular * material.specular * specular_strength;
+
+vec3 final_color = ambient_color + diffuse_color + specular_color;
+color = vec4(final_color, 1.f);
+```
+
+### Lighting Texture(光照贴图)
+
+* 镜面贴图中白色的点镜面反射强，黑色的点镜面反射弱
+* RGB 直接加在像素点颜色上可以模拟发光效果
+
+```c
+struct Material {
+    // 省略 ambient，因为其值在大多数情况下和 diffuse 一样
+    sampler2D diffuse;      // 使用贴图表示 diffuse
+    sampler2D specular;     // 使用贴图表示 specular
+    float shininess;
+};
+...
+in vec2 TexCoords;
+```
+
+### Light Casters
+
+* Directional Light: 光源无限远的平行光，方向一般定义为从光源发出
+* Point Light: 向所有方向发光，随距离增加变暗
+* Spotlight: 只朝某个方向照射的点光源
+
+点光源衰减公式([$K_c,K_l,K_q$取值参考](https://learnopengl-cn.readthedocs.io/zh/latest/02%20Lighting/05%20Light%20casters)):
+
+$$F_{att} = \frac{1.0}{K_c + K_l * d + K_q * d^2}$$
+
+计算 Fragment 是否 Spotlight 范围内(在世界坐标计算)：
+
+```yml
+已知变量:
+    frag_point: fragment 坐标
+    light_point: 光源坐标
+    spot_dir: 聚光中心轴方向向量，从光源发出
+    Phi(φ): 聚光圆锥半径的切光角，即最边缘光线和中心光线夹角
+计算:
+    frag_dir: 从光源指向 fragment 的向量, frag_dir = normalize(frag_point - light_point)
+    Theta(θ): frag_dir 和 spot_dir 夹角, cos(θ) = dot(frag_dir, normalize(spot_dir))
+结果:
+    光线内: φ >= θ，即 cos(φ) <= cos(θ)
+    光线外: φ <  θ，即 cos(φ) > cos(θ)
+```
+
+计算 Spotlight 软化边缘，公式为:
+
+$$I = \frac{cos(\theta) - cos(\gamma)}{\epsilon}$$
+
+```yml
+已知变量:
+    引用:  计算 Spotlight 范围的所有变量
+    Gamma(γ): 外圆锥半径切光角，即软化后边缘光线夹角
+计算:
+    Epsilon(ε): 当 θ = φ 时, I 应为 1，可得 ε = cos(φ) - cos(γ)
+    强度系数(I): 将 ε 代入公式计算即可，使用 clamp 将结果固定在 [0, 1]
+公式解释:
+    内圆锥内: I > 1, 取 1
+    外圆锥外: I < 0, 取 0
+    内外间 I: [0, 1] 之间
+```
+
+### Multiple Lights
+
+多光源对物体的影响一般是分别计算单光源输出的颜色，最后加在一起
 
 ## API
 
@@ -596,7 +821,32 @@ OpenGL本身 **没有** 摄像机的概念，但我们可以通过把场景中�
 |glfwSwapBuffers            |交换颜色缓冲(将缓冲区所有像素颜色输出到屏幕?)
 |glfwGetError               |获取错误信息，没有错误为 NULL
 |glfwSetKeyCallback         |设置键盘回调函数
+|glfwSetCursorPosCallback   |设置鼠标移动回调函数
+|glfwSetScrollCallback      |设置鼠标滚轮回调函数
+|glfwSetInputMode           |设置输入方式
 |glfwGetTime                |获取当前时间(秒)
+
+#### glfwSetKeyCallback
+
+```c
+GLFWkeyfun glfwSetKeyCallback(GLFWwindow* handle, GLFWkeyfun cbfun);
+
+// key     : 对应按键，枚举值如 GLFW_KEY_A
+// scancode:
+// action  : GLFW_PRESS: 按下; GLFW_RELEASE: 松开; GLFW_REPEAT: 持续按住
+// mods    :
+typedef void (* GLFWkeyfun)(GLFWwindow* window, int key, int scancode, int action, int mods);
+```
+
+#### glfwSetInputMode
+
+```c
+// 隐藏光标，有时候不行，不知道原因
+void mouse_enter_callback(GLFWwindow* window, int entered) {
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+}
+glfwSetCursorEnterCallback(window, mouse_enter_callback);
+```
 
 ### GLEW API
 
@@ -718,7 +968,7 @@ sudo ninja -C build install
 
 ```sh
 git clone https://github.com/llvm/llvm-project.git
-# 根据需要使用 -D 设置宏
+# 根据需要使用 -D 设置选项
 cmake -S llvm -B build -G "Unix Makefiles" -DLLVM_ENABLE_PROJECTS="clang;lld;libclc"
 cd build
 make -j8

@@ -117,6 +117,18 @@ sampler3D: 三维纹理
 
 ## 函数
 
+|func |desc
+|- |-
+|max              |求最大值
+|pow              |幂运算
+|clamp            |小/大 于最 小/大 值则返回最 小/大 值，否则返回自身
+|length           |求向量长度
+|normalize        |标准化指定向量
+|dot              |向量点乘
+|inverse          |求逆矩阵
+|transpose        |求转置矩阵
+|reflect          |计算反射光线方向
+
 ### texture
 
 获取纹理像素
@@ -137,6 +149,17 @@ vec4 mix(vec4 color1, vec4 color2, float v2_ratio);
 
 v2_ratio: 第二个颜色所占比例
 output  : color1 * (1 - v2_ratio) + color2 * v2_ratio
+```
+
+### reflect
+
+计算入射光线经法线反射后方向
+
+```c
+vec3 reflect(vec3 light_vector, vec3 normal_vector);
+
+light_vector: 从光源指向反射点
+normal_vector: 反射点处法向量
 ```
 
 ## 控制语句

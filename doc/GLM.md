@@ -3,7 +3,7 @@
 
 [github](https://github.com/icaven/glm)
 
-GLM 只有头文件，只需要 include 即可
+OpenGL Mathematics, GLM 只有头文件，只需要 include 即可
 
 ```c
 // 常用头文件
@@ -17,6 +17,26 @@ GLM 只有头文件，只需要 include 即可
 ### 列主序
 
 OpenGL 通常使用一种内部矩阵布局，叫做列主序(Column-major Ordering)，GLM 的默认布局就是列主序。
+
+## functions
+
+### normalized
+
+```c
+// 将向量 x 转换为单位向量(方向不变，长度变为 1)
+vec3 normalize(vec3 const& x);
+```
+
+### 向量运算
+
+```c
+glm::vec3 va(1.f);
+glm::vec3 vb(2.f);
+
+float dr = glm::dot(va, vb);            // 点乘
+glm::vec3 cr = glm::cross(va * vb);     // 叉乘
+glm::vec3 cw = va * vb;                 // 分量乘法
+```
 
 ## demo
 
@@ -105,10 +125,41 @@ glm::mat4 camera(float Translate, glm::vec2 const& Rotate) {
 通过创建观察矩阵来模拟摄像机
 
 ```c
-// 使用 lookAt 创建 View-Matrix
+// 用法: 使用 lookAt 创建 View-Matrix
 glm::mat4 view = glm::lookAt(
-    glm::vec3(0.0f, 0.0f, 3.0f),    // 摄像机位置
-    glm::vec3(0.0f, 0.0f, 0.0f),    // 摄像机指向的位置
-    glm::vec3(0.0f, 1.0f, 0.0f)     // 摄像机坐标系的 y 轴正方向
+    glm::vec3(0.0f, 0.0f, 3.0f),    // 摄像机位置 pos
+    glm::vec3(0.0f, 0.0f, 0.0f),    // 摄像机指向的位置，一般为 pos + front_vector
+    glm::vec3(0.0f, 1.0f, 0.0f)     // 上向量(摄像机坐标系的 y 轴正方向)
 );
+```
+
+原理
+
+![look_at](./pics/look_at.jpg)
+
+```c
+// 实现
+glm::mat4 lookAt(const glm::vec3 &pos, const glm::vec3 &dir, const glm::vec3 &up) {
+    const glm::vec3 &P = pos;
+    glm::vec3 D = glm::normalize(pos - dir);
+    glm::vec3 R = glm::normalize(glm::cross(up, D));
+    glm::vec3 U = glm::cross(D, R);     // 已经是单位向量了，不需要 normalize
+    glm::mat4 lm(1.f);                  // rotation
+    glm::mat4 rm(1.f);                  // translation
+    lm[0][0] = R.x;
+    lm[1][0] = R.y;
+    lm[2][0] = R.z;
+    lm[0][1] = U.x;
+    lm[1][1] = U.y;
+    lm[2][1] = U.z;
+    lm[0][2] = D.x;
+    lm[1][2] = D.y;
+    lm[2][2] = D.z;
+
+    rm[3][0] = -P.x;
+    rm[3][1] = -P.y;
+    rm[3][2] = -P.z;
+
+    return lm * rm;
+}
 ```
