@@ -55,3 +55,29 @@ SPIR-V（Standard Portable Intermediate Representation - Vulkan）是一种中�
 |floating           |FALSE -> 0.0, TRUE -> 1.0, integer -> float(integer)/double(integer)
 
 #### Command Execution
+
+规范中主要讨论单个 CPU 线程中绑定的单个 context。但多线程(各自绑定一个 context)也可以共享 GL 对象。可以将关联较小的任务分发到多个 context 中以提高执行速度和 GPU 利用率
+
+##### Errors
+
+只有可能发生错误时才会检查 error，防止影响 error-free 程序
+
+```c
+enum GetError(void);
+```
+
+Table 2.3: Summary of GL errors 查看所有 GL 错误
+
+|Implicit Errors |desc
+|- |-
+|NO_ERROR           |表示无错
+|CONTEXT_LOST       |没有当前 context
+|INVALID_ENUM       |实参为非法枚举值
+|INVALID_VALUE      |形参为 sizei/sizeiptr，实参为负数
+|OUT_OF_MEMORY      |内存不足
+|INVALID_OPERATION  |当前状态不允许枚举值对应操作
+
+* 如果有 error 但未调用 GetError，该 error 标志会一直存在，且不会被后面的 error 刷新
+* 当有 error 时，如果是 OUT_OF_MEMORY 则 GL 行为不确定，其他情况下导致该 error 的 GL 命令无效，即不会影响 GL state 和 framebuffer
+* 当命令发生 error 时，如果有返回值一般为 0，按地址传递的值不会被修改
+* No Error Mode: 如果发生错误，行为未定义，可能会崩溃; GetError 只会返回 NO_ERROR/OUT_OF_MEMORY

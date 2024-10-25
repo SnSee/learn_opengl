@@ -48,6 +48,7 @@
 |SOIL   |Simple OpenGL Image Library
 |GLM    |OpenGL Mathematics
 |FOV    |Field of View
+|Assimp |Open Asset Import Library
 
 ### 中英文对照
 
@@ -205,6 +206,13 @@
 |Point Light                    |点光
 |Spotlight                      |聚光
 |Attenuation                    |(光线)衰减
+
+#### 模型
+
+|EN |CN
+|- |-
+|Face                           |面片: 渲染中的一个最基本的形状单位，即图元
+|Mesh                           |网格
 
 ## 系统自带 OpenGL 库及查看版本
 
@@ -389,6 +397,10 @@ GLuint gen_texture(const char *img_path) {
     int width, height;
     // 加载图片资源
     unsigned char *img = SOIL_load_image(img_path, &width, &height, 0, SOIL_LOAD_RGB);
+    if (img == nullptr) {
+        printf("Failed to load image: %s\n", img_path.c_str());
+        exit(-1);
+    }
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, img);
     // 创建 mipmap
     glGenerateMipmap(GL_TEXTURE_2D);
@@ -738,6 +750,37 @@ $$I = \frac{cos(\theta) - cos(\gamma)}{\epsilon}$$
 
 多光源对物体的影响一般是分别计算单光源输出的颜色，最后加在一起
 
+### 加载模型
+
+[Assimp库](./assimp.md)
+
+绘制模型时不会渲染整个模型，而是渲染其所包含的所有独立的 mesh
+
+#### Mesh(网格)
+
+```cpp
+struct Vertex {
+    vec3 position;
+    vec3 normal;
+    vec2 texture_coord;
+};
+struct Texture {
+    GLuint id;
+    string type;
+};
+
+class Mesh {
+    vector<Vertex> vertices;
+    vector<GLuint> indices;
+    vector<Texture> textures;
+    GLuint VAO, VBO, EBO;
+};
+
+class Model {
+    vector<Mesh> meshes;
+};
+```
+
 ## API
 
 ### GL API
@@ -1011,7 +1054,7 @@ ninja -j8       # meson compile -C .
 sudo meson install
 
 # 链接库(替代 libGL.so)
-libOSMesa.so
+libGL.so(不使用 glvnd), libOSMesa.so
 ```
 
 ## QA
