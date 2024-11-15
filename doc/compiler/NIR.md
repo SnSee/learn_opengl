@@ -68,7 +68,11 @@ nir_function: 链接阶段 GLSL 格式的重载函数
 nir_function_overload: 重载函数的声明或定义
 nir_function_impl: 重载函数的实现，包含局部变量和寄存器等，并且是 control-flow-tree 的根节点
 nir_cf_node: control-flow-tree 中的一个节点
+    - nir_if
+    - nir_loop
+    - nir_block
 nir_instr: instruction 基类
+    - 派生的各种 instruction
 ```
 
 ## NIR Control Flow

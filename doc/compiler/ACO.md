@@ -347,6 +347,133 @@ NP-complete problem（NP完全问题）是一个在计算理论中非常重要�
 * 近似算法：提供一种方法，保证解的近似比，但不能保证多项式时间。
 * 分支限界法：通过搜索空间剪枝策略，尝试在有限时间内找到最优解。
 
+### Barrier
+
+在GPU编程中，barrier（或称为内存屏障、同步屏障）是一个用于控制并行线程执行的同步原语。它的主要作用是确保在并行计算过程中，某些线程在执行到某个点时必须等待其他线程到达同一个点，才能继续执行。换句话说，barrier保证了所有线程在继续执行后续代码之前，都达到了同一个同步点。
+
+详细解释：
+
+1. 线程同步: GPU编程通常涉及大量并行线程的执行。在某些情况下，不同线程可能会执行不同的任务，但在某些关键点上，它们需要彼此之间进行同步。例如，某个线程可能需要等待其他线程完成一部分计算，才能继续自己的计算。barrier提供了一种机制来实现这种同步。
+2. 局部同步与全局同步:
+    * 局部同步：通常是指在同一个线程块（block）或线程组内的线程之间的同步。例如，在CUDA编程中，__syncthreads() 是一个常用的barrier，它确保线程块中的所有线程在继续执行之前都到达该调用点。
+    * 全局同步：有时需要在不同线程块之间进行同步，这在一些GPU编程模型中比较复杂，因为不同的线程块可能在不同的处理单元上并行执行。全局同步通常需要使用更高级别的同步机制或特定的硬件支持。
+3. 数据一致性: Barrier还可以保证内存中的数据一致性。例如，在CUDA中，__syncthreads()不仅同步线程，还确保所有线程在同步点之前的内存写入操作是可见的。这对于避免数据竞争和确保计算的正确性非常重要。
+
+使用场景：
+
+* Tile算法：在一些矩阵计算或图形处理算法中，线程块内的线程往往需要协作完成一个子任务，在计算的某个阶段，线程之间可能需要交换数据或确保计算一致性。这时就需要使用barrier来同步线程。
+* Reduction操作：例如在并行计算中进行归约（reduction）操作时，线程可能需要先局部归约，然后同步，再进行全局归约。同步点就需要使用barrier。
+
+### DPP8 / DPP16
+
+在GPU编程中，DPP8和DPP16通常指的是数据并行处理（Data Parallel Processing）中的数据打包格式或处理方式。具体来说：
+
+* DPP8：DPP8中的"DPP"代表Data Parallel Processing，"8"则表示每个线程处理8位（1字节）的数据。DPP8通常用于处理8位整数数据，例如在图像处理或机器学习推理过程中，这种格式可以有效地打包和处理多个8位数据点。
+
+* DPP16：类似地，DPP16中的"16"表示每个线程处理16位（2字节）的数据。DPP16用于处理16位整数或半精度浮点数（FP16）数据。在需要更高精度或动态范围的情况下，DPP16比DPP8更合适。
+
+这些术语常见于GPU的SIMT（Single Instruction, Multiple Threads）架构中，尤其是AMD的GCN（Graphics Core Next）架构。在这些架构中，DPP允许在单个指令下并行处理多个数据点，从而提高计算效率。
+
+### SDWA
+
+在GPU编程中，SDWA代表Single Data Word Atomic (单数据字原子操作)。这是一种用于优化数据传输和操作的技术，特别是在AMD的GCN（Graphics Core Next）架构中使用。SDWA技术允许在单个线程中对单个数据字（通常是32位）进行原子操作，而不需要复杂的硬件锁或同步机制。
+
+SDWA的主要特点和用途包括：
+
+* 优化性能：通过减少同步和锁的需求，SDWA可以显著提高某些类型操作的性能，尤其是在需要频繁进行原子操作的场景中。
+* 简化编程：对于开发者来说，使用SDWA可以简化代码，因为它不需要处理复杂的同步机制，使得代码更易于编写和维护。
+* 数据传输优化：SDWA还优化了数据在内存和寄存器之间的传输效率，进一步提升了整体性能。
+
+在AMD的GPU编程中，开发者可以使用SDWA来优化需要高性能原子操作的应用程序，尤其是在图形处理、科学计算和机器学习等需要大量数据并行操作的领域。
+
+### Reduction
+
+在GPU编程中，reduction（规约）是一种常见的并行计算操作，主要用于将一个数据集合通过某种二元操作（例如加法、乘法、最大值、最小值等）合并成一个单一的结果。规约操作通常用于求和、求最大值、求最小值、求平均值等场景。
+
+具体操作过程：
+
+1. 输入数据集合：假设我们有一个包含 N 个元素的数组，每个线程可以处理其中一个或多个元素。
+2. 并行处理：每个线程先并行处理自己负责的那部分数据。比如，如果要做加法规约，每个线程会将自己负责的那部分数据相加。
+3. 逐步合并：由于最终目标是将所有数据合并成一个单一的结果，因此需要多个步骤来合并线程之间的结果。这通常涉及将部分结果逐步合并到全局结果中。
+4. 最终结果：经过几次迭代合并操作后，最终可以得到整个数据集合的规约结果。
+
+常见的规约操作：
+
+* 求和（Sum）：将所有元素相加，得到一个总和。
+* 最大值（Max）：找出数据集合中的最大元素。
+* 最小值（Min）：找出数据集合中的最小元素。
+* 乘积（Product）：将所有元素相乘，得到总乘积。
+* 逻辑与/或（AND/OR）：对所有元素执行逻辑与或逻辑或操作。
+
+并行规约的挑战
+
+在GPU上实现规约操作时，主要挑战在于如何高效地协调大量线程协同工作。由于GPU拥有数千个并发线程，因此需要设计合理的并行算法，以确保这些线程能够快速、有效地合并中间结果。
+
+常见的并行规约策略：
+
+* 分治法（Divide and Conquer）：将数据分成多个块，每个块由一组线程并行处理，然后递归地将部分结果合并，直到得到最终结果。
+* 树形规约（Tree Reduction）：类似于分治法，但通过构建一棵树来合并结果，每个线程先处理局部数据，然后逐层向上合并结果，类似于构建一棵“树”的过程。
+* 分块规约（Block Reduction）：每个线程块先计算自己的局部结果，然后由一个特定的线程块继续处理这些局部结果，直到得到最终结果。
+
+### Divergence Analysis
+
+在GPU编程中，**divergence analysis（分支发散分析）**是一个重要的概念，主要用于理解和优化GPU内核（kernel）中的分支指令。分支发散指的是在执行过程中，同一波前（wavefront）或线程块（thread block）中的不同线程由于条件判断（如if-else语句）而执行不同的代码路径，导致线程间的执行路径不再一致。
+
+分支发散的定义: 在一个波前或线程块中，如果某些线程执行某一分支路径，而其他线程执行不同的分支路径，则发生了分支发散。分支发散通常由条件语句（如if、else、switch等）引起。
+
+分支发散会显著影响GPU的性能，因为：
+
+* 串行执行：在发生分支发散的情况下，原本可以并行执行的线程会被迫串行执行不同的代码路径，降低了并行效率。
+* 额外开销：GPU需要维护多个执行路径，并在后续阶段重新同步这些线程，这会增加额外的开销和延迟。
+
+分支发散分析的目的
+
+1. 识别分支发散：通过分析内核代码，识别哪些地方可能发生分支发散。
+2. 优化代码：通过重构代码或使用特定的编程技巧，减少或消除分支发散，从而提高并行效率。
+
+常见的分支发散优化技巧
+
+* 减少条件语句：尽量减少内核代码中的条件语句数量，特别是那些可能导致明显分支发散的条件语句。
+* 合并条件：将多个条件合并，使得更多线程可以走同一路径。例如，使用&&或||合并多个条件。
+* 使用掩码：在某些情况下，可以使用掩码（mask）来控制线程的执行路径，而不使用显式的条件语句。
+* 向量化：在某些架构中，使用向量化指令可以减少分支发散，因为向量化指令可以在同一指令周期内处理多个数据点。
+
+分支发散分析工具
+
+* NVIDIA Nsight Compute：NVIDIA提供的一个强大的分析工具，可以用来分析和可视化CUDA内核的分支发散情况。
+* AMD Radeon Developer Tools：AMD提供的一组工具，可以用来分析和优化GPU内核中的分支发散。
+
+### GDS / LDS
+
+在 GPU 编程的 GFX 规范中，GDS（Global Data Share）和 LDS（Local Data Share）是两种不同的内存区域，用于在 GPU 计算单元（CU）内或跨计算单元共享数据。它们的主要区别在于作用范围和使用方式。
+
+1. LDS（Local Data Share）
+    * 作用范围：LDS 是一种局部内存，只在单个计算单元（CU）或一个工作组（Workgroup）内共享。
+    * 用途：LDS 通常用于存储工作组内所有线程共享的数据。由于它是局部内存，访问速度非常快，适合用于频繁读写的场景，例如共享数据的中间结果存储。
+    * 特点：LDS 的容量相对较小，通常为几 KB 到几十 KB，但访问延迟很低。
+2. GDS（Global Data Share）
+    * 作用范围：GDS 是一种全局内存，可以跨多个计算单元（CU）或工作组（Workgroup）共享数据。
+    * 用途：GDS 用于需要在多个工作组之间共享的数据。由于其全局特性，GDS 的访问速度比 LDS 慢，但它的作用范围更广。
+    * 特点：GDS 的容量通常比 LDS 大得多，可以达到几百 KB 甚至更大，但访问延迟相对较高。
+
+### dword
+
+dword是一个数据类型，表示“双字”（Double Word）即一个 **32位** 的整数，相当于4个字节。
+在C/C++语言中，dword通常被定义为一个无符号整数类型（unsigned int），因为它通常用于表示颜色的RGBA分量、纹理坐标或其他需要32位无符号整数的场合。
+在使用HLSL（High-Level Shader Language）或GLSL（OpenGL Shading Language）进行GPU编程时，dword 可能不是直接使用的数据类型，但你会在一些文档或代码中看到它被提及，因为它在底层的数据传输和处理中非常重要。
+
+## Data Structure
+
+### Definition
+
+```mermaid
+classDiagram
+    class Definition {
+        - bool isFixed_;    // 是否绑定到寄存器
+        - PhysReg reg_;     // 绑定到哪个寄存器
+    }
+```
+
 ## Control Flow
 
 * GPU 是并行执行 shader 程序的 SIMD
@@ -444,7 +571,7 @@ GCN 需要手动插入一些 wait states 来保证 memory instructions 和一些
 
 ## Supported shader stages
 
-硬件各个阶段(hardware stages as executed on the chip) 并完全对应软件阶段(software stages as defined in OpenGL / Vulkan)。哪个软件阶段在哪个硬件阶段执行取决于当前 pipeline 中存在哪些软件阶段。
+硬件各个阶段(hardware stages as executed on the chip) 并非完全对应软件阶段(software stages as defined in OpenGL / Vulkan)。哪个软件阶段在哪个硬件阶段执行取决于当前 pipeline 中存在哪些软件阶段。
 
 一个重要的不同点是在软件模型(SW models)中 VS 总是第一个要运行的阶段，而在 GCN/RDNA 的术语中，HW VS 是指在片段着色器(fragment shading)之前的最后一个硬件阶段(HW stage)。这就是为什么当使用细分或几何着色(tessellation or geometry shading)时，HW VS 不再用于执行 SW VS。
 
@@ -513,4 +640,43 @@ ACO_DEBUG option:
 ```sh
 # 指定选项
 RADV_DEBUG=nocache,shaders ACO_DEBUG=validateir,validatera vkcube
+```
+
+## 源码
+
+### 编译阶段对应源文件
+
+|Compilation Phases |Source File
+|- |-
+|Instruction Selection              |aco_instruction_selection.cpp<br> aco_instruction_selection.h<br>aco_instruction_selection_setup.cpp
+|Value Numbering                    |aco_opt_value_numbering.cpp<br>aco_dominance.cpp
+|Optimization                       |aco_optimizer.cpp<br> aco_optimizer_postRA.cpp
+|Setup of reduction temporaries     |aco_reduce_assign.cpp
+|Insert exec mask                   |aco_insert_exec_mask.cpp
+|Live-Variable Analysis             |aco_live_var_analysis.cpp
+|Spilling                           |aco_spill.cpp
+|Instruction Scheduling             |aco_scheduler.cpp
+|Register Allocation                |aco_register_allocation.cpp
+|SSA Elimination                    |aco_ssa_elimination.cpp<br>aco_lower_to_cssa.cpp<br>aco_reindex_ssa.cpp<br>aco_lower_phis.cpp
+|Lower to HW instructions           |aco_lower_to_hw_instr.cpp
+|ILP Scheduling                     |aco_scheduler_ilp.cpp<br>aco_form_hard_clauses.cpp
+|Insert wait states                 |aco_insert_waitcnt.cpp
+|Resolve hazards and insert NOPs    |aco_insert_NOPs.cpp
+|Emit program - Assembler           |aco_assembler.cpp
+
+其他源文件
+
+```txt
+aco_dead_code_analysis.cpp
+aco_interface.cpp
+aco_interface.h
+aco_ir.cpp
+aco_ir.h
+aco_lower_subdword.cpp
+aco_print_asm.cpp
+aco_print_ir.cpp
+aco_shader_info.h
+aco_statistics.cpp
+aco_util.h
+aco_validate.cpp
 ```

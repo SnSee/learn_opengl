@@ -932,131 +932,43 @@ pointer     : 数据起始位置，0 为无偏移，有多少 offset 将多少 o
 
 ## Mesa
 
-[demo](https://archive.mesa3d.org/demos)
+## 安装指定 amdgpu 驱动
 
-注意:
+[安装脚本](https://www.amd.com/zh-cn/support/downloads/drivers.html/graphics/radeon-600-500-400/radeon-rx-400-series/radeon-rx-460.html)
 
-```txt
-1.查看系统是否有 glvnd(pkg-config --modversion libglvnd)，如果有则不会编译出 libGL(可以删除 libglvnd.pc)
-```
-
-### 编译安装
-
-[官网指南](https://docs.mesa3d.org/install.html)
-
-[使用 meson 编译](https://docs.mesa3d.org/meson.html)
-
-注意:
-
-```txt
-1. 优先使用系统提供的软件版本，没有符合要求的版本时再源码安装
-2. 保证 LLVM 相关库版本一致
-```
-
-* 遇到缺少的环境时使用 apt 安装，如果没有就前加 lib 后加 -dev 试试
-* 使用 apt search 查看哪些包包含所需组件
-* 版本都太低就自己找源码编译
-
-#### 安装系统库
+需要在 bios 中 **关闭 secure boot**
 
 ```sh
-# sudo apt install libglvnd-dev
-sudo apt install libtizonia-dev
-sudo apt install zstd
-sudo apt install rust-1.80-all
-sudo apt install libelf-dev
-sudo apt install byacc
-sudo apt install flex
-sudo apt install bison
-sudo apt install libwayland-dev
-sudo apt install libwayland-egl1-mesa
-sudo apt install libwayland-egl1-mesa
-sudo apt install libwayland-dev
-sudo apt install libwayland-egl-backend
-sudo apt install libwayland-egl-backend-dev
-sudo apt install libxcb-randr0-dev
-sudo apt install libxext-dev
-sudo apt install libxfixes-dev
-sudo apt install libxcb-glx0-dev
-sudo apt install libxcb-shm0-dev
-sudo apt install libx11-xcb-dev
-sudo apt install libxcb-dri2-0-dev
-sudo apt install libxcb-dri3-dev
-sudo apt install libxcb-present-dev
-sudo apt install libxshmfence-dev
-sudo apt install libxxf86vm-dev
-sudo apt install libxrandr-dev
-sudo apt install cbindgen
-pip install ply -i http://mirrors.aliyun.com/pypi/simple --trusted-host mirrors.aliyun.com
-# 参考 rust#cargo 配置镜像源
-cargo install --force cbindgen
-# 如果报错使用了 unstable feature
-rustup default nightly
+# 查看当前是否有显卡驱动
+lsmod | grep amdgpu
+
+# 查看是否是 secure boot
+mokutil --sb-state
+
+sudo apt install ./amdgpu-install*.deb
+sudo amdgpu-install -y --usecase=graphics,rocm
+# 重启
+# 如果没有查询结果，确保amd驱动安装无误后手动加载模块
+sudo modprobe amdgpu
 ```
 
-#### DRM
-
-[drm git仓库](git://anongit.freedesktop.org/mesa/drm)
-[github镜像](https://github.com/Distrotech/libdrm)
-
-Direct Rendering Manager，Linux内核中的一个子系统，用于提供对图形硬件的直接访问。
+查看显卡驱动是否安装成功
 
 ```sh
-git clone git://anongit.freedesktop.org/mesa/drm
-meson build
-sudo ninja -C build install
-```
-
-#### 编译 LLVM
-
-```sh
-git clone https://github.com/llvm/llvm-project.git
-# 根据需要使用 -D 设置选项
-cmake -S llvm -B build -G "Unix Makefiles" -DLLVM_ENABLE_PROJECTS="clang;lld;libclc"
-cd build
-make -j8
-```
-
-#### 编译 llvm-spirv
-
-```sh
-git clone https://github.com/KhronosGroup/SPIRV-LLVM-Translator.git
-mkdir build & cd build
-cmake ..
-make llvm-spirv
-```
-
-#### 编译 libclc
-
-```sh
-# 代码就是 llvm-project 代码
-mkdir build-libclc & cd build-libclc
-# llvm-spirv 使用使用的路径
-cmake -S ../libclc -B . -G Ninja -DLLVM_CONFIG="$LLVM_CONFIG" -DLIBCLC_TARGETS_TO_BUILD="spirv-mesa3d-;spirv64-mesa3d-" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DLLVM_SPIRV=/usr/bin/llvm-spirv
-ninja -j8
-ninja install
-```
-
-#### 编译 mesa
-
-```sh
-# prefix: 安装路径，如系统目录 /usr
-# libdir: 一般 /usr/lib 或 /usr/lib64
-# dri-drivers: 驱动路径，使用 find -type d -name dri 查找
-# meson configure --prefix=/usr --libdir=xxx -D dri-drivers-path=xxx ..
-mkdir build & cd build
-# 使用 llvm 的选项要和编译时一致，如使用静态库，不使用 RTTI 等
-meson setup .. -Dprefix="/install/directory" -Dosmesa=true -Dshared-llvm=disabled -Dcpp_rtti=false
-# meson setup .. -Ddefault_library=shared
-# 使用指定版本的 llvm
-# meson setup .. --native-file ../custom-llvm.ini
-ninja -j8       # meson compile -C .
-sudo meson install
-
-# 链接库(替代 libGL.so)
-libGL.so(不使用 glvnd), libOSMesa.so
+lsmod | grep amdgpu
+rocm-smi
+rocminfo
+glxinfo -B
 ```
 
 ## QA
 
 [gl, glu, glut 区别](https://blog.csdn.net/fanhenghui/article/details/52882837)
+
+解决报错: MESA: error: ZINK: failed to choose pdev
+
+```sh
+sudo add-apt-repository ppa:kisak/kisak-mesa  
+sudo apt update  
+sudo apt upgrade
+```

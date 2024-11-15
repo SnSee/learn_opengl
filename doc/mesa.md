@@ -11,6 +11,153 @@
 
 [DRI wiki](https://dri.freedesktop.org/wiki)
 
+## 编译
+
+[demo](https://archive.mesa3d.org/demos)
+
+注意:
+
+```txt
+1.查看系统是否有 glvnd(pkg-config --modversion libglvnd)，如果有则不会编译出 libGL，使用 -Dglvnd=disabled 方式禁用
+```
+
+### 编译安装
+
+[官网指南](https://docs.mesa3d.org/install.html)
+
+[使用 meson 编译](https://docs.mesa3d.org/meson.html)
+
+注意:
+
+```txt
+1. 优先使用系统提供的软件版本，没有符合要求的版本时再源码安装
+2. 保证 LLVM 相关库版本一致
+```
+
+* 遇到缺少的环境时使用 apt 安装，如果没有就前加 lib 后加 -dev 试试
+* 使用 apt search 查看哪些包包含所需组件
+* 版本都太低就自己找源码编译
+
+#### 安装系统库
+
+```sh
+# sudo apt install libglvnd-dev
+sudo apt install -y libtizonia-dev
+sudo apt install -y zstd
+sudo apt install -y rust-1.80-all
+sudo apt install -y libelf-dev
+sudo apt install -y byacc
+sudo apt install -y flex
+sudo apt install -y bison
+sudo apt install -y libwayland-dev
+sudo apt install -y libwayland-egl1-mesa
+sudo apt install -y libwayland-egl1-mesa
+sudo apt install -y libwayland-dev
+sudo apt install -y libwayland-egl-backend
+sudo apt install -y libwayland-egl-backend-dev
+sudo apt install -y libxcb-randr0-dev
+sudo apt install -y libxext-dev
+sudo apt install -y libxfixes-dev
+sudo apt install -y libxcb-glx0-dev
+sudo apt install -y libxcb-shm0-dev
+sudo apt install -y libx11-xcb-dev
+sudo apt install -y libxcb-dri2-0-dev
+sudo apt install -y libxcb-dri3-dev
+sudo apt install -y libxcb-present-dev
+sudo apt install -y libxshmfence-dev
+sudo apt install -y libxxf86vm-dev
+sudo apt install -y libxrandr-dev
+sudo apt install -y libclang-dev
+sudo apt install -y cbindgen
+sudo apt install -y glslang-tools
+sudo apt install -y python3-pkgconfig
+sudo apt install -y llvm-18-tools
+sudo apt install -y libclc-18
+sudo apt install -y libclc-18-dev
+sudo apt install -y llvm-spirv-18
+sudo apt install -y libllvmspirvlib-18-dev
+sudo apt install -y python3-ply
+sudo apt install -y bindgen
+# pip install ply -i http://mirrors.aliyun.com/pypi/simple --trusted-host mirrors.aliyun.com
+# 参考 rust#cargo 配置镜像源
+cargo install --force cbindgen
+# 如果报错使用了 unstable feature
+rustup default nightly
+sudo ln -s /usr/bin/llvm-config-18 /usr/bin/llvm-config
+sudo ln -s /usr/bin/rustc-1.80 /usr/bin/rustc
+```
+
+#### DRM
+
+[drm git仓库](git://anongit.freedesktop.org/mesa/drm)
+[github镜像](https://github.com/Distrotech/libdrm)
+
+Direct Rendering Manager，Linux内核中的一个子系统，用于提供对图形硬件的直接访问。
+
+```sh
+git clone git://anongit.freedesktop.org/mesa/drm
+meson build
+sudo ninja -C build install
+```
+
+#### 编译 LLVM
+
+```sh
+git clone https://github.com/llvm/llvm-project.git
+# 根据需要使用 -D 设置选项
+cmake -S llvm -B build -G "Unix Makefiles" -DLLVM_ENABLE_PROJECTS="clang;lld;libclc"
+cd build
+make -j8
+```
+
+#### 编译 llvm-spirv
+
+```sh
+git clone https://github.com/KhronosGroup/SPIRV-LLVM-Translator.git
+mkdir build & cd build
+cmake ..
+make llvm-spirv
+```
+
+#### 编译 libclc
+
+```sh
+# 代码就是 llvm-project 代码
+mkdir build-libclc & cd build-libclc
+# llvm-spirv 使用使用的路径
+cmake -S ../libclc -B . -G Ninja -DLLVM_CONFIG="$LLVM_CONFIG" -DLIBCLC_TARGETS_TO_BUILD="spirv-mesa3d-;spirv64-mesa3d-" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DLLVM_SPIRV=/usr/bin/llvm-spirv
+ninja -j8
+ninja install
+```
+
+#### 编译 mesa
+
+```sh
+# prefix: 安装路径，如系统目录 /usr
+# libdir: 一般 /usr/lib 或 /usr/lib64
+# dri-drivers: 驱动路径，使用 find -type d -name dri 查找
+# meson configure --prefix=/usr --libdir=xxx -D dri-drivers-path=xxx ..
+mkdir -p build
+# 使用 llvm 的选项要和编译时一致，如使用静态库，不使用 RTTI 等
+meson setup build -Dprefix="/install/directory" -Dosmesa=true -Dshared-llvm=disabled -Dcpp_rtti=false --buildtype=debug
+# meson setup .. -Ddefault_library=shared
+# 使用指定版本的 llvm
+# meson setup .. --native-file ../custom-llvm.ini
+ninja -C build -j8       # meson compile -C .
+sudo meson install
+
+# 链接库(替代 libGL.so)
+libGL.so(不使用 glvnd), libOSMesa.so
+```
+
+#### 使用 ACO
+
+```sh
+# gallium-drivers 只使用 radeonsi
+meson setup build -Dprefix="/install/dir" --buildtype=debug -Damd-use-llvm=false -Dgallium-drivers=radeonsi,llvmpipe
+ninja -C build -j50
+```
+
 ## 概念
 
 ### DRI
@@ -183,4 +330,36 @@ _mesa_make_current( struct gl_context *newCtx,
 ```mermaid
 flowchart TB
     OSMesaMakeCurrent --> st_api_make_current --> _mesa_make_current --> _glapi_set_dispatch
+```
+
+### _mesa_CompileShader
+
+GLSL code -> frontend IR
+
+```c
+// shaderObj: 由 glCreateShader 生成的对象编号
+void _mesa_CompileShader(GLuint shaderObj);
+```
+
+调用堆栈
+
+```txt
+glCompileShader             ->
+_mesa_CompileShader         ->
+_mesa_compile_shader        ->
+_mesa_glsl_compile_shader
+```
+
+编译结果保存在 GLSL shader object(frontend IR) 中，对象类型为 **gl_shader**
+gl_shader 对象由 **_mesa_lookup_shader_err** 函数生成
+
+### _mesa_lookup_shader_err
+
+生成 gl_shader 对象，该对象在 glCreateShader 时已经创建，保存在一个 **哈希表** 中(_mesa_HashTable)
+
+```c
+// ctx   : context
+// name  : 由 glCreateShader 生成的对象编号
+// caller: 主调函数名称
+struct gl_shader * _mesa_lookup_shader_err(struct gl_context *ctx, GLuint name, const char *caller);
 ```
