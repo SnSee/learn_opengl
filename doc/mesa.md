@@ -154,7 +154,7 @@ libGL.so(不使用 glvnd), libOSMesa.so
 
 ```sh
 # gallium-drivers 只使用 radeonsi
-meson setup build -Dprefix="/install/dir" --buildtype=debug -Damd-use-llvm=false -Dgallium-drivers=radeonsi,llvmpipe
+meson setup build -Dprefix="/install/dir" --buildtype=debug -Damd-use-llvm=false -Dgallium-drivers=radeonsi
 ninja -C build -j50
 ```
 
