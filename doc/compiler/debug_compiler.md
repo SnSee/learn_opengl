@@ -192,6 +192,8 @@ aco_assembler:emit_instruction(translate instructions into binary codes)
 
 ACO_DEBUG 环境变量可选值: aco_debug_options
 AMD_DEBUG 环境变量可选值: radeonsi_debug_options
+NIR_DEBUG 环境变量可选值: nir_debug_control
+RADV_DEBUG 环境变量可选值: radv_debug_options
 
 ```cpp
 // 在 si_fill_aco_options 函数中设置

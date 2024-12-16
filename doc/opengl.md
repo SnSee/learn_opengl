@@ -248,6 +248,11 @@ EGL (Embedded-System Graphics Library) 是一个中间层接口，主要用于�
 
 GLFW 是一个跨平台的库，用于创建窗口和处理输入事件，如键盘、鼠标和游戏手柄。它提供了一系列函数，用于设置窗口的属性、处理窗口的消息循环以及处理各种输入设备的事件。GLFW 的目标是为 OpenGL 程序提供一个轻量级、高效和跨平台的窗口和输入接口。
 
+```cmake
+# 编译为动态库
+set(GLFW_LIBRARY_TYPE "SHARED")
+```
+
 ### GLEW
 
 [download](https://glew.sourceforge.net/index.html)

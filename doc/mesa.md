@@ -105,7 +105,9 @@ sudo ninja -C build install
 ```sh
 git clone https://github.com/llvm/llvm-project.git
 # 根据需要使用 -D 设置选项
-cmake -S llvm -B build -G "Unix Makefiles" -DLLVM_ENABLE_PROJECTS="clang;lld;libclc"
+# 如果无法使用 git 需要手动指定 SPIRV 头文件路径 -DLLVM_EXTERNAL_SPIRV_HEADERS_SOURCE_DIR=/tmp/SPIRV-Headers
+# -G "Ninja": 使用 ninja 编译，会更快
+cmake -S llvm -B build -G "Unix Makefiles" -DLLVM_ENABLE_PROJECTS="clang;lld;libclc" -DCMAKE_INSTALL_PREFIX=/install/dir -DLLVM_BUILD_LLVM_DYLIB=ON -DLLVM_LINK_LLVM_DYLIB=ON
 cd build
 make -j8
 ```
