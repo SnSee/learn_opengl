@@ -961,8 +961,8 @@ sudo modprobe amdgpu
 
 ```sh
 lsmod | grep amdgpu
-rocm-smi
-rocminfo
+/opt/rocm/bin/rocm-smi
+/opt/rocm/bin/rocminfo
 glxinfo -B
 ```
 
