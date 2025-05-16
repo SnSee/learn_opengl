@@ -49,7 +49,7 @@
 |PARAM  |Shader export type             |Export operation that writes data to fixed function parameter cache storage
 |PBB    |Primitive Batch Binner         |Pre-Scan converter unit that traverses primitives multiple times in bin order
 |PC*    |Parameter Cache*               |Dedicated memory unit in GPU pipeline
-|PC     |Program Counter
+|PC     |Program Counter                |寄存器，指向当前正在执行指令的内存地址
 |PFB    |Packet Filtering Block         |Discards redundant state updates and registers
 |PFP    |PreFetch Parser                |CP first packet parser
 |PM4    |public GPU packet              |Proprietary public packet

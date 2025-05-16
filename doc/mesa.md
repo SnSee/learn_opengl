@@ -95,8 +95,9 @@ sudo ln -s /usr/bin/rustc-1.80 /usr/bin/rustc
 Direct Rendering Manager，Linux内核中的一个子系统，用于提供对图形硬件的直接访问。
 
 ```sh
-git clone git://anongit.freedesktop.org/mesa/drm
-meson build
+sudo apt install libcunit1-dev                          # amdgpu_test 依赖 cunit
+git clone https://gitlab.freedesktop.org/mesa/drm.git
+meson build -Damdgpu=enabled --buildtype=debug
 sudo ninja -C build install
 ```
 
